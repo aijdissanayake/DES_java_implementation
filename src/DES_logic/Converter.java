@@ -14,12 +14,19 @@ import java.util.ArrayList;
  */
 public class Converter {
     
-    private static ArrayList getParts(String string, int partitionSize) {
+    /**
+     *
+     * @param string
+     * @param partitionSize
+     * @return
+     */
+    public ArrayList getParts(String string, int partitionSize) {
         ArrayList parts = new ArrayList<String>();
         int len = string.length();
         for (int i=0; i<len; i+=partitionSize)
         {
             parts.add(string.substring(i, Math.min(len, i + partitionSize)));
+            //System.out.println(string.substring(i, Math.min(len, i + partitionSize)));
         }
         return parts;
     }

@@ -5,6 +5,11 @@
  */
 package DES_logic;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+
 /**
  *
  * @author Achala PC
@@ -28,6 +33,24 @@ public class CryptoProcessor {
 
     private final int[] contractPerm = 
     {32,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
+    
+    public String readFile(String fileName) throws IOException {
+        
+        BufferedReader br = new BufferedReader(new FileReader(fileName));
+        try {
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+
+            while (line != null) {
+                sb.append(line);
+                sb.append("\n");
+                line = br.readLine();
+            }
+            return sb.toString();
+        } finally {
+            br.close();
+        }
+    }
 
     // Permutates the message
     private String permutateMsg(String bitStream, int [] permutationArray) {
@@ -59,33 +82,41 @@ public class CryptoProcessor {
     }
     //encryption method
     public String encrypt(String msg, String key) {
+        
         KeyHandler newSubKeyGenerator = new KeyHandler();        
         String [] subKeys = newSubKeyGenerator.createKeyPool(key);
-        String binaryMsg = converter.stringToBinary(msg);
-        String permutedMessage = permutateMsg(binaryMsg, firstPerm);
-//        String permutedMessage = permutateMsg(msg, firstPerm);
-        String l0 = permutedMessage.substring(0,32);
-        String r0 = permutedMessage.substring(32);
+        
+        StringBuilder enc = new StringBuilder();
+        ArrayList<String> chunks = converter.getParts(msg, 8);
+        for(String chunk: chunks) {
+        
+            String binaryMsg = converter.stringToBinary(chunk);
+            String permutedMessage = permutateMsg(binaryMsg, firstPerm);
+    //        String permutedMessage = permutateMsg(msg, firstPerm);
+            String l0 = permutedMessage.substring(0,32);
+            String r0 = permutedMessage.substring(32);
 
-        String [] ln = new String [17];
-        String [] rn = new String [17];
-        ln[0] = l0;
-        rn[0] = r0;
+            String [] ln = new String [17];
+            String [] rn = new String [17];
+            ln[0] = l0;
+            rn[0] = r0;
 
-        for(int count = 1; count <= 16; ++count) {
-            ln[count] = rn[count - 1];
-            rn[count] = xor(ln[count - 1], xorSubFunction(rn[count - 1], subKeys[count - 1]));
+            for(int count = 1; count <= 16; ++count) {
+                ln[count] = rn[count - 1];
+                rn[count] = xor(ln[count - 1], xorSubFunction(rn[count - 1], subKeys[count - 1]));
+            }
+
+            String finalLeft = rn[16];
+            String finalRight = ln[16];
+            String finalString = finalLeft + finalRight;
+            String binaryEncryptedMsg = permutateMsg(finalString, finalPerm);
+            System.out.println("test" + binaryEncryptedMsg);
+    //        String encryptedMsg = converter.binaryToChar(binaryEncryptedMsg);
+    //        return encryptedMsg;
+            enc.append(binaryEncryptedMsg);
+            
         }
-
-        String finalLeft = rn[16];
-        String finalRight = ln[16];
-        String finalString = finalLeft + finalRight;
-        String binaryEncryptedMsg = permutateMsg(finalString, finalPerm);
-        System.out.println("test" + binaryEncryptedMsg);
-//        String encryptedMsg = converter.binaryToChar(binaryEncryptedMsg);
-//        return encryptedMsg;
-        return binaryEncryptedMsg;
-
+            return enc.toString();
     }
     //decryption method
     public String decrypt(String msg, String key) {
@@ -93,27 +124,33 @@ public class CryptoProcessor {
         String [] subKeys = newSubKeyGenerator.createKeyPool(key);
 //        String binaryMsg = converter.stringToBinary(msg);
 //        String permutedMessage = permutateMsg(binaryMsg, firstPerm);
-        String permutedMessage = permutateMsg(msg, firstPerm);
-        String l0 = permutedMessage.substring(0,32);
-        String r0 = permutedMessage.substring(32);
+        StringBuilder dec = new StringBuilder();
+        ArrayList<String> chunks = converter.getParts(msg, 64);
+        for(String chunk: chunks) {
+            String permutedMessage = permutateMsg(chunk, firstPerm);
+            String l0 = permutedMessage.substring(0,32);
+            String r0 = permutedMessage.substring(32);
 
-        String [] ln = new String [17];
-        String [] rn = new String [17];
-        ln[0] = l0;
-        rn[0] = r0;
+            String [] ln = new String [17];
+            String [] rn = new String [17];
+            ln[0] = l0;
+            rn[0] = r0;
 
-        for(int count = 1; count <= 16; ++count) {
-            ln[count] = rn[count - 1];
-            rn[count] = xor(ln[count - 1], xorSubFunction(rn[count - 1], subKeys[15 - (count - 1)]));
+            for(int count = 1; count <= 16; ++count) {
+                ln[count] = rn[count - 1];
+                rn[count] = xor(ln[count - 1], xorSubFunction(rn[count - 1], subKeys[15 - (count - 1)]));
+            }
+
+            String finalLeft = rn[16];
+            String finalRight = ln[16];
+            String finalString = finalLeft + finalRight;
+            String binaryDecryptedMsg = permutateMsg(finalString, finalPerm);
+            String decryptedMsg = converter.binaryToChar(binaryDecryptedMsg);
+            dec.append(decryptedMsg);
+            //return decryptedMsg;
         }
-
-        String finalLeft = rn[16];
-        String finalRight = ln[16];
-        String finalString = finalLeft + finalRight;
-        String binaryDecryptedMsg = permutateMsg(finalString, finalPerm);
-        String decryptedMsg = converter.binaryToChar(binaryDecryptedMsg);
-        return decryptedMsg;
 //        return binaryDecryptedMsg;
+          return dec.toString();
 
     }
 }
