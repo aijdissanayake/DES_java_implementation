@@ -286,6 +286,7 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_pathButtonActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+// cancel a selected file
         filePath.setText("");
         fileMsg = false;
     }//GEN-LAST:event_jButton2ActionPerformed
