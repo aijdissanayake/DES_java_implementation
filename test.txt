@@ -1,3 +1,4 @@
 check conflicts
+this is a test text
 achalajd
 jdac**

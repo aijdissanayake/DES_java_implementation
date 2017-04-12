@@ -228,6 +228,7 @@ public class GUI extends javax.swing.JFrame {
         }
         System.out.println(filePath.getText());
         this.key = keyField.getText();
+        //validate the key length
         if(key.length()== 8){
             int gap =message.length()%8;
             if(gap !=0){
@@ -235,6 +236,7 @@ public class GUI extends javax.swing.JFrame {
                     this.message = message +" ";
                 }
             }
+            //validate the messsage is not zero
             if(message.length() % 8 == 0 && message.length()!=0){
                 if (encryptButton.isSelected()){
                     String encryptedMessage = processor.encrypt(message, key);
